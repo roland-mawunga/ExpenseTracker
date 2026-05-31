@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS Categories (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name TEXT NOT NULL,
+    Keywords TEXT NOT NULL,
+    Color TEXT NOT NULL DEFAULT '#6B7280'
+);
+
+CREATE TABLE IF NOT EXISTS Transactions (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    Date TEXT NOT NULL,
+    Description TEXT NOT NULL,
+    Amount REAL NOT NULL,
+    Type TEXT NOT NULL,
+    CategoryId INTEGER,
+    Notes TEXT,
+    ImportedAt TEXT NOT NULL,
+    FOREIGN KEY (CategoryId) REFERENCES Categories(Id)
+);
