@@ -19,6 +19,7 @@ import {
   TablePagination,
   InputAdornment,
   useTheme,
+  type SelectChangeEvent,
 } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditNoteIcon from "@mui/icons-material/EditNote";
@@ -203,13 +204,14 @@ export default function TransactionTable({
                   <TableCell>
                     <Select
                       size="small"
-                      value={t.categoryId ?? ""}
-                      onChange={(e) =>
+                      value={t.categoryId != null ? String(t.categoryId) : ""}
+                      onChange={(e: SelectChangeEvent) => {
+                        const value = e.target.value; // always a string now
                         handleCategoryChange(
                           t.id,
-                          e.target.value === 0 ? null : Number(e.target.value),
-                        )
-                      }
+                          value === "" ? null : Number(value),
+                        );
+                      }}
                       displayEmpty
                       sx={{
                         fontSize: 12,
@@ -228,7 +230,7 @@ export default function TransactionTable({
                         <em>Uncategorized</em>
                       </MenuItem>
                       {categories.map((c) => (
-                        <MenuItem key={c.id} value={c.id}>
+                        <MenuItem key={c.id} value={String(c.id)}>
                           {c.name}
                         </MenuItem>
                       ))}
