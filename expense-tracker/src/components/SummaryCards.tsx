@@ -157,7 +157,7 @@ export default function SummaryCards({ cards }: Props) {
       title: "Biggest Category",
       value: cards.biggestSpendCategory,
       subtitle: "most spending",
-      icon: <PriorityHighIcon />,
+      icon: <CategoryIcon />,
       color: "#f97316",
     },
     {
