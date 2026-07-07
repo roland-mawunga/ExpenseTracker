@@ -22,45 +22,92 @@ interface StatCardProps {
   title: string;
   value: string;
   subtitle?: string;
+  footerText?: string;
   icon: React.ReactNode;
   color: string;
 }
 
-function StatCard({ title, value, subtitle, icon, color }: StatCardProps) {
-  //   const theme = useTheme();
-
+function StatCard({
+  title,
+  value,
+  subtitle,
+  footerText = "28 Dec 2025 - 07 Jan 2026",
+  icon,
+  color,
+}: StatCardProps) {
   return (
-    <Card sx={{ height: "100%" }}>
-      <CardContent sx={{ p: 3 }}>
+    <Card
+      sx={{
+        height: "100%",
+        borderRadius: 3,
+      }}
+    >
+      <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
         <Box
           display="flex"
           justifyContent="space-between"
           alignItems="flex-start"
+          gap={2}
         >
-          <Box>
-            <Typography variant="body2" color="text.secondary" mb={0.5}>
+          {/* Content */}
+          <Box flex={1} minWidth={0}>
+            <Typography
+              variant="overline"
+              color="text.secondary"
+              sx={{
+                letterSpacing: 1,
+                lineHeight: 1.2,
+                display: "block",
+                mb: 0.5,
+              }}
+            >
               {title}
             </Typography>
-            <Typography variant="h5" fontWeight={700}>
+
+            <Typography
+              variant="h4"
+              fontWeight={700}
+              sx={{ lineHeight: 1.1, mb: subtitle ? 0.75 : 0 }}
+            >
               {value}
             </Typography>
+
             {subtitle && (
-              <Typography variant="body2" color="text.secondary" mt={0.5}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ lineHeight: 1.4 }}
+              >
                 {subtitle}
               </Typography>
             )}
+
+            {footerText && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", mt: 1.5, lineHeight: 1.3 }}
+              >
+                {footerText}
+              </Typography>
+            )}
           </Box>
+
+          {/* Icon */}
           <Box
             sx={{
-              backgroundColor: `${color}22`,
-              borderRadius: 2,
-              p: 1,
+              width: 52,
+              height: 52,
+              borderRadius: 3,
+              backgroundColor: `${color}15`,
+              color: color,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
             }}
           >
-            <Box sx={{ color }}>{icon}</Box>
+            <Box sx={{ fontSize: 28, display: "flex" }}>{icon}</Box>
           </Box>
         </Box>
       </CardContent>
@@ -110,7 +157,7 @@ export default function SummaryCards({ cards }: Props) {
       title: "Biggest Category",
       value: cards.biggestSpendCategory,
       subtitle: "most spending",
-      icon: <CategoryIcon />,
+      icon: <PriorityHighIcon />,
       color: "#f97316",
     },
     {
