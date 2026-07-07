@@ -13,9 +13,12 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import SavingsIcon from "@mui/icons-material/Savings";
 import CategoryIcon from "@mui/icons-material/Category";
 import type { SummaryCards as SummaryCardsType } from "../api/expenses";
+import { formatDateRange } from "../utils/formatDate";
 
 interface Props {
   cards: SummaryCardsType;
+  startDate: string | undefined;
+  endDate: string | undefined;
 }
 
 interface StatCardProps {
@@ -118,7 +121,7 @@ function StatCard({
 const formatCurrency = (amount: number) =>
   `R ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export default function SummaryCards({ cards }: Props) {
+export default function SummaryCards({ cards, startDate, endDate }: Props) {
   const theme = useTheme();
 
   const stats: StatCardProps[] = [
@@ -173,7 +176,10 @@ export default function SummaryCards({ cards }: Props) {
     <Grid container spacing={2}>
       {stats.map((stat) => (
         <Grid size={{ xs: 12, sm: 6, md: 4 }} key={stat.title}>
-          <StatCard {...stat} />
+          <StatCard
+            footerText={`${startDate && endDate ? formatDateRange(new Date(startDate), new Date(endDate)) : ""}`}
+            {...stat}
+          />
         </Grid>
       ))}
     </Grid>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Box, Typography, CircularProgress, Grid } from "@mui/material";
 import ImportCard from "./components/ImportCard";
 import SummaryCards from "./components/SummaryCards";
@@ -35,6 +35,19 @@ function App() {
     }
   };
 
+  const dataDateRange = useMemo(() => {
+    if (transactions.length === 0) return null;
+
+    const sorted = [...transactions].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
+    return {
+      startDate: sorted[0].date,
+      endDate: sorted[sorted.length - 1].date,
+    };
+  }, [transactions]);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -58,7 +71,11 @@ function App() {
         </Box>
       ) : summary ? (
         <Box display="flex" flexDirection="column" gap={3}>
-          <SummaryCards cards={summary.cards} />
+          <SummaryCards
+            cards={summary.cards}
+            startDate={dataDateRange?.startDate}
+            endDate={dataDateRange?.endDate}
+          />
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 4 }}>
@@ -75,7 +92,7 @@ function App() {
           <TransactionTable
             transactions={transactions}
             categories={categories}
-            onUpdate={fetchData}
+            // onUpdate={fetchData}
           />
         </Box>
       ) : null}
