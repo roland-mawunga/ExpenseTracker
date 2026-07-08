@@ -19,12 +19,24 @@ public class CsvImportService
     {
         var categories = _categoryRepository.GetAll().ToList();
 
+        // Build the lookup once
+        var categoryLookup = categories
+            .Select(c => new CategoryLookup
+            {
+                Id = c.Id,
+                Keywords = c.Keywords
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(k => k.Trim())
+                    .ToList()
+            })
+            .ToList();
+
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true,
-            MissingFieldFound = null,       // don't throw if a column is missing
-            BadDataFound = null,            // skip malformed rows
-            TrimOptions = TrimOptions.Trim  // trim whitespace from fields
+            MissingFieldFound = null,
+            BadDataFound = null,
+            TrimOptions = TrimOptions.Trim
         };
 
         using var reader = new StreamReader(csvStream);
@@ -32,50 +44,43 @@ public class CsvImportService
 
         var transactions = new List<Transaction>();
 
-        csv.Read();
-        csv.ReadHeader();
+        var records = csv.GetRecords<CsvTransaction>();
 
-        while (csv.Read())
+        foreach (var record in records)
         {
-            var description = csv.GetField<string>("Description") ?? string.Empty;
-            var amountStr   = csv.GetField<string>("Amount") ?? "0";
-            var dateStr     = csv.GetField<string>("Date") ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(record.Description))
+                continue;
 
-            if (string.IsNullOrWhiteSpace(description)) continue;
+            var amount = ParseAmount(record.Amount);
 
-            var amount = ParseAmount(amountStr);
-
-            var transaction = new Transaction
+            transactions.Add(new Transaction
             {
-                Date        = ParseDate(dateStr),
-                Description = description,
-                Amount      = Math.Abs(amount),
-                Type        = amount < 0 ? "debit" : "credit",
-                CategoryId  = MatchCategory(description, categories),
-                ImportedAt  = DateTime.UtcNow
-            };
-
-            transactions.Add(transaction);
+                Date = ParseDate(record.Date),
+                Description = record.Description,
+                Amount = Math.Abs(amount),
+                Type = amount < 0 ? "debit" : "credit",
+                CategoryId = MatchCategory(record.Description, categoryLookup),
+                ImportedAt = DateTime.UtcNow
+            });
         }
 
         return transactions;
     }
 
-    private int? MatchCategory(string description, List<Category> categories)
+    private int? MatchCategory(
+    string description,
+    List<CategoryLookup> categories)
     {
-        var lower = description.ToLower();
-
         foreach (var category in categories)
         {
-            var keywords = category.Keywords
-                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(k => k.Trim().ToLower());
-
-            if (keywords.Any(k => lower.Contains(k)))
+            if (category.Keywords.Any(keyword =>
+                description.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
+            {
                 return category.Id;
+            }
         }
 
-        return null; // uncategorized
+        return null;
     }
 
     private decimal ParseAmount(string value)
